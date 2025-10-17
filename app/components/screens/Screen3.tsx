@@ -1,6 +1,82 @@
+'use client';
+
 import Image from 'next/image';
+import { useState, useRef } from 'react';
 
 export default function Screen3() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [transcribedText, setTranscribedText] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const startRecording = async () => {
+    try {
+      setIsRecording(true);
+      setIsListening(true);
+
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+
+        // Create audio blob
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+        // Send to Whisper API
+        await transcribeAudio(audioBlob);
+      };
+
+      // Start recording
+      mediaRecorder.start();
+
+      // Stop recording after 5 seconds (you can make this configurable)
+      setTimeout(() => {
+        mediaRecorder.stop();
+        setIsRecording(false);
+        setIsListening(false);
+      }, 5000);
+
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      setIsRecording(false);
+      setIsListening(false);
+      alert('Error accessing microphone. Please check permissions.');
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.wav');
+
+      const response = await fetch('/api/whisper', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setTranscribedText(result.text);
+        if (textareaRef.current) {
+          textareaRef.current.value = result.text;
+        }
+      } else {
+        alert('Error transcribing audio: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      alert('Error transcribing audio. Please try again.');
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -78,6 +154,7 @@ export default function Screen3() {
           {/* Typing area for letters */}
           <div className="mb-8 sm:mb-10 lg:mb-12 xl:mb-16 max-w-2xl mx-auto">
             <textarea
+              ref={textareaRef}
               className="w-full text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-800 bg-transparent border-none outline-none resize-none placeholder-gray-500 text-center"
               placeholder="Type your creative idea here..."
               rows={3}
@@ -91,10 +168,30 @@ export default function Screen3() {
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             {/* Microphone button */}
-            <button className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-              <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-              </svg>
+            <button
+              onClick={startRecording}
+              disabled={isRecording}
+              className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+                isListening
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 animate-pulse scale-110'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105'
+              } ${isRecording ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              {isListening ? (
+                // Animated listening indicator
+                <div className="relative">
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                  </svg>
+                  {/* Pulsing rings for visual feedback */}
+                  <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full border border-red-400 animate-pulse"></div>
+                </div>
+              ) : (
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                </svg>
+              )}
             </button>
 
             {/* Create button */}
