@@ -3,10 +3,16 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 
-export default function Screen3() {
+interface Screen3Props {
+  onImageGenerated?: (imageUrl: string, prompt: string) => void;
+}
+
+export default function Screen3({ onImageGenerated }: Screen3Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-expand textarea based on content, but keep it reasonable
@@ -24,6 +30,45 @@ export default function Screen3() {
   useEffect(() => {
     adjustTextareaHeight();
   }, [transcribedText]);
+
+  const generateImage = async () => {
+    const prompt = textareaRef.current?.value.trim();
+    if (!prompt) {
+      alert('Please enter a creative idea first!');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          sampleCount: 1 // Generate 1 sketch for coloring book use case
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setGeneratedImage(result.imageUrl);
+        // Notify parent component about image generation
+        if (onImageGenerated) {
+          onImageGenerated(result.imageUrl, prompt);
+        }
+      } else {
+        alert('Error generating image: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error generating image:', error);
+      alert('Error generating image. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -223,10 +268,40 @@ export default function Screen3() {
             </button>
 
             {/* Create button */}
-            <button className="px-8 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-base sm:text-lg md:text-xl lg:text-2xl font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-              Create
+            <button
+              onClick={generateImage}
+              disabled={isGenerating}
+              className={`px-8 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-4 text-white text-base sm:text-lg md:text-xl lg:text-2xl font-semibold rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+                isGenerating
+                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-75'
+                  : 'bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 cursor-pointer'
+              }`}
+            >
+              {isGenerating ? 'Creating...' : 'Create'}
             </button>
           </div>
+
+          {/* Generated Image Display */}
+          {generatedImage && (
+            <div className="mt-8 sm:mt-12 lg:mt-16 max-w-4xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 text-center">
+                  Your Sketch Template
+                </h3>
+                <div className="relative">
+                  <img
+                    src={generatedImage}
+                    alt="Generated sketch template"
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
+                  <div className="absolute inset-0 bg-black/5 rounded-lg pointer-events-none"></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-4 text-center">
+                  Black dots show where to sketch the details. Children can fill in these areas with their creativity!
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

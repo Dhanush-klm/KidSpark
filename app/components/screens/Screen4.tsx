@@ -1,0 +1,237 @@
+'use client';
+
+import Image from 'next/image';
+import { useState } from 'react';
+
+interface Screen4Props {
+  imageUrl: string | null;
+  prompt: string;
+}
+
+export default function Screen4({ imageUrl, prompt }: Screen4Props) {
+  const [activeTab, setActiveTab] = useState<'coloring' | 'animation'>('coloring');
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(imageUrl);
+
+  const handleRefresh = async () => {
+    if (!prompt) return;
+
+    setIsRegenerating(true);
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          sampleCount: 1
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCurrentImageUrl(result.imageUrl);
+      } else {
+        alert('Error regenerating image: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error regenerating image:', error);
+      alert('Error regenerating image. Please try again.');
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  const handlePlay = () => {
+    // Play animation functionality
+    alert('Animation feature coming soon!');
+  };
+
+  const handleDownload = () => {
+    // Download the current sketch
+    if (currentImageUrl) {
+      const link = document.createElement('a');
+      link.href = currentImageUrl;
+      link.download = 'sketch-template.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  if (!currentImageUrl) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your sketch template...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Decorative circles and shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-orange-200/20 rounded-full"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-orange-200/30 rounded-full"></div>
+        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-pink-200/25 rounded-full"></div>
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-orange-200/25 rounded-full"></div>
+
+        {/* Small dots */}
+        <div className="absolute top-32 left-1/3 w-3 h-3 bg-orange-300/40 rounded-full"></div>
+        <div className="absolute top-60 right-1/4 w-2 h-2 bg-orange-300/50 rounded-full"></div>
+        <div className="absolute bottom-40 left-1/2 w-4 h-4 bg-orange-300/35 rounded-full"></div>
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 w-full flex flex-col min-h-screen">
+        {/* Header section */}
+        <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-orange-600 mb-1 sm:mb-2 leading-tight">
+              Hi Champu
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700">
+              Let's color and animate!
+            </p>
+          </div>
+
+          {/* Profile image */}
+          <div className="relative group cursor-pointer ml-4 flex-shrink-0">
+            <div className="relative transform transition-transform duration-300 group-hover:scale-105">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 p-1 shadow-lg">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-50 to-orange-50 p-1">
+                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-white shadow-xl ring-2 ring-orange-100">
+                    <Image
+                      src="/screen3.png"
+                      alt="Champu's profile"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 bg-green-400 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
+                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 overflow-y-auto">
+          {/* Tab Navigation */}
+          <div className="flex bg-white/80 backdrop-blur-sm rounded-full p-1 mb-8 shadow-lg">
+            <button
+              onClick={() => setActiveTab('coloring')}
+              className={`px-6 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+                activeTab === 'coloring'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Coloring
+            </button>
+            <button
+              onClick={() => setActiveTab('animation')}
+              className={`px-6 py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${
+                activeTab === 'animation'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Animation
+            </button>
+          </div>
+
+          {/* Sketch Display Area */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl mb-8 w-full max-w-4xl">
+            <div className="aspect-[4/3] bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden">
+              {currentImageUrl ? (
+                <img
+                  src={currentImageUrl}
+                  alt="Sketch template"
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              ) : (
+                <div className="text-center text-gray-500">
+                  <div className="animate-pulse">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-lg font-medium">Sketch Template</p>
+                    <p className="text-sm">Black dots show where to add colors!</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Overlay for coloring mode */}
+              {activeTab === 'coloring' && currentImageUrl && (
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/10 rounded-xl pointer-events-none"></div>
+              )}
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800 text-center">
+                <strong>Coloring Instructions:</strong> The black dots are special coloring areas! Color over them with any colors you want to add your creative details and make the sketch uniquely yours!
+              </p>
+            </div>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex items-center justify-center gap-4 sm:gap-6">
+            {/* Refresh button */}
+            <button
+              onClick={handleRefresh}
+              disabled={isRegenerating}
+              className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+                isRegenerating
+                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:scale-105 cursor-pointer'
+              }`}
+            >
+              {isRegenerating ? (
+                <div className="animate-spin">
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              ) : (
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              )}
+            </button>
+
+            {/* Play button */}
+            <button
+              onClick={handlePlay}
+              className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            >
+              <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {/* Download button */}
+            <button
+              onClick={handleDownload}
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            >
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m8 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
