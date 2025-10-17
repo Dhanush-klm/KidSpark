@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function Screen3() {
   const [isRecording, setIsRecording] = useState(false);
@@ -9,8 +9,35 @@ export default function Screen3() {
   const [transcribedText, setTranscribedText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Auto-expand textarea based on content, but keep it reasonable
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const maxHeight = window.innerHeight * 0.3; // Max 30% of screen height
+      const newHeight = Math.max(80, Math.min(textarea.scrollHeight, maxHeight));
+      textarea.style.height = `${newHeight}px`;
+    }
+  };
+
+  // Auto-adjust height when transcribed text changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [transcribedText]);
+
   const startRecording = async () => {
     try {
+      if (isRecording) {
+        // Stop recording if already recording
+        const currentRecorder = (window as any).currentMediaRecorder;
+        if (currentRecorder) {
+          currentRecorder.stop();
+        }
+        setIsRecording(false);
+        setIsListening(false);
+        return;
+      }
+
       setIsRecording(true);
       setIsListening(true);
 
@@ -27,22 +54,21 @@ export default function Screen3() {
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
 
-        // Create audio blob
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        // Only process if we have audio data (avoid empty recordings)
+        if (audioChunks.length > 0) {
+          // Create audio blob
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
 
-        // Send to Whisper API
-        await transcribeAudio(audioBlob);
+          // Send to Whisper API
+          await transcribeAudio(audioBlob);
+        }
       };
 
       // Start recording
       mediaRecorder.start();
 
-      // Stop recording after 5 seconds (you can make this configurable)
-      setTimeout(() => {
-        mediaRecorder.stop();
-        setIsRecording(false);
-        setIsListening(false);
-      }, 5000);
+      // Store mediaRecorder reference so we can stop it later
+      (window as any).currentMediaRecorder = mediaRecorder;
 
     } catch (error) {
       console.error('Error accessing microphone:', error);
@@ -68,6 +94,8 @@ export default function Screen3() {
         setTranscribedText(result.text);
         if (textareaRef.current) {
           textareaRef.current.value = result.text;
+          // Auto-expand the textarea after adding text
+          setTimeout(adjustTextareaHeight, 0);
         }
       } else {
         alert('Error transcribing audio: ' + result.error);
@@ -78,7 +106,7 @@ export default function Screen3() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-auto">
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Decorative circles and shapes */}
@@ -106,7 +134,7 @@ export default function Screen3() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 h-screen w-full flex flex-col">
+      <div className="relative z-10 w-full flex flex-col">
         {/* Header section */}
         <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 flex-shrink-0">
           <div className="flex-1 min-w-0">
@@ -144,38 +172,38 @@ export default function Screen3() {
           </div>
         </div>
 
-        {/* Main content area - flex-grow to fill remaining space */}
-        <div className="flex-1 flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 mb-8 sm:mb-10 lg:mb-12 xl:mb-16 leading-tight">
+        {/* Main content area - fit to screen, scroll when overflow */}
+        <div className="flex flex-col items-center text-center px-4 sm:px-6 lg:px-8 py-4 min-h-0 flex-1 overflow-y-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 mb-6 sm:mb-8 lg:mb-10 xl:mb-12 leading-tight">
             What should we<br />
             create today
           </h2>
 
           {/* Typing area for letters */}
-          <div className="mb-8 sm:mb-10 lg:mb-12 xl:mb-16 max-w-2xl mx-auto">
+          <div className="mb-6 sm:mb-8 lg:mb-10 xl:mb-12 max-w-4xl mx-auto">
             <textarea
               ref={textareaRef}
               className="w-full text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-800 bg-transparent border-none outline-none resize-none placeholder-gray-500 text-center"
               placeholder="Type your creative idea here..."
-              rows={3}
-              style={{ minHeight: '120px' }}
+              style={{ minHeight: '80px' }}
+              onInput={adjustTextareaHeight}
             />
           </div>
 
           {/* Divider line */}
-          <div className="w-20 sm:w-24 md:w-32 h-1 bg-gray-400 mx-auto mb-8 sm:mb-10 lg:mb-12 xl:mb-16"></div>
+          <div className="w-20 sm:w-24 md:w-32 h-1 bg-gray-400 mx-auto mb-6 sm:mb-8 lg:mb-10 xl:mb-12"></div>
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             {/* Microphone button */}
             <button
               onClick={startRecording}
-              disabled={isRecording}
               className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
                 isListening
                   ? 'bg-gradient-to-r from-red-500 to-red-600 animate-pulse scale-110'
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105'
-              } ${isRecording ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
+              }`}
+              title={isRecording ? 'Click to stop recording' : 'Click to start recording'}
             >
               {isListening ? (
                 // Animated listening indicator
