@@ -12,6 +12,8 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
   const [activeTab, setActiveTab] = useState<'coloring' | 'animation'>('coloring');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(imageUrl);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
 
   const handleRefresh = async () => {
     if (!prompt) return;
@@ -44,9 +46,36 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
     }
   };
 
-  const handlePlay = () => {
-    // Play animation functionality
-    alert('Animation feature coming soon!');
+  const handlePlay = async () => {
+    if (!currentImageUrl || !prompt) return;
+
+    setIsGeneratingVideo(true);
+    try {
+      const response = await fetch('/api/generate-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: currentImageUrl,
+          prompt: prompt,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setGeneratedVideoUrl(result.videoUrl);
+        setActiveTab('animation');
+      } else {
+        alert('Error generating video: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error generating video:', error);
+      alert('Error generating video. Please try again.');
+    } finally {
+      setIsGeneratingVideo(false);
+    }
   };
 
   const handleDownload = () => {
@@ -153,7 +182,20 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
           {/* Sketch Display Area */}
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl mb-8 w-full max-w-4xl">
             <div className="aspect-[4/3] bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden">
-              {currentImageUrl ? (
+              {activeTab === 'animation' && generatedVideoUrl ? (
+                <video
+                  src={generatedVideoUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain rounded-xl"
+                  onError={(e) => {
+                    console.error('Video error:', e);
+                    alert('Error loading video. Please try again.');
+                  }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : currentImageUrl ? (
                 <img
                   src={currentImageUrl}
                   alt="Sketch template"
@@ -180,7 +222,15 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             {/* Instructions */}
             <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800 text-center">
-                <strong>Coloring Instructions:</strong> The black dots are special coloring areas! Color over them with any colors you want to add your creative details and make the sketch uniquely yours!
+                {activeTab === 'animation' ? (
+                  <>
+                    <strong>Animation:</strong> Your 15-second animated video is ready! Press the center button to generate a new animation from your sketch and prompt.
+                  </>
+                ) : (
+                  <>
+                    <strong>Coloring Instructions:</strong> The black dots are special coloring areas! Color over them with any colors you want to add your creative details and make the sketch uniquely yours!
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -213,11 +263,24 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             {/* Play button */}
             <button
               onClick={handlePlay}
-              className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              disabled={isGeneratingVideo}
+              className={`w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+                isGeneratingVideo
+                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 cursor-pointer'
+              }`}
             >
-              <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-              </svg>
+              {isGeneratingVideo ? (
+                <div className="animate-spin">
+                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              ) : (
+                <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                </svg>
+              )}
             </button>
 
             {/* Download button */}
