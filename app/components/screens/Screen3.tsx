@@ -1,0 +1,109 @@
+import Image from 'next/image';
+
+export default function Screen3() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Decorative circles and shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-orange-200/20 rounded-full"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-orange-200/30 rounded-full"></div>
+        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-pink-200/25 rounded-full"></div>
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-orange-200/25 rounded-full"></div>
+
+        {/* Small dots */}
+        <div className="absolute top-32 left-1/3 w-3 h-3 bg-orange-300/40 rounded-full"></div>
+        <div className="absolute top-60 right-1/4 w-2 h-2 bg-orange-300/50 rounded-full"></div>
+        <div className="absolute bottom-40 left-1/2 w-4 h-4 bg-orange-300/35 rounded-full"></div>
+
+        {/* Paper plane trail */}
+        <svg className="absolute top-16 right-20 w-32 h-16" viewBox="0 0 100 50">
+          <path
+            d="M10,40 Q30,20 50,35 T90,25"
+            stroke="#D4A574"
+            strokeWidth="1.5"
+            strokeDasharray="3,3"
+            fill="none"
+            opacity="0.6"
+          />
+        </svg>
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 h-screen w-full flex flex-col">
+        {/* Header section */}
+        <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-orange-600 mb-1 sm:mb-2 leading-tight">
+              Hi Champu
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700">
+              Let's learn something new today!
+            </p>
+          </div>
+
+          {/* Profile image */}
+          <div className="relative group cursor-pointer ml-4 flex-shrink-0">
+            {/* Profile container with enhanced styling */}
+            <div className="relative transform transition-transform duration-300 group-hover:scale-105">
+              {/* Outer ring for profile effect */}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 p-1 shadow-lg">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-50 to-orange-50 p-1">
+                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-white shadow-xl ring-2 ring-orange-100">
+                    <Image
+                      src="/screen3.png"
+                      alt="Champu's profile"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Online indicator */}
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 bg-green-400 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
+                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main content area - flex-grow to fill remaining space */}
+        <div className="flex-1 flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 mb-8 sm:mb-10 lg:mb-12 xl:mb-16 leading-tight">
+            What should we<br />
+            create today
+          </h2>
+
+          {/* Typing area for letters */}
+          <div className="mb-8 sm:mb-10 lg:mb-12 xl:mb-16 max-w-2xl mx-auto">
+            <textarea
+              className="w-full text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-800 bg-transparent border-none outline-none resize-none placeholder-gray-500 text-center"
+              placeholder="Type your creative idea here..."
+              rows={3}
+              style={{ minHeight: '120px' }}
+            />
+          </div>
+
+          {/* Divider line */}
+          <div className="w-20 sm:w-24 md:w-32 h-1 bg-gray-400 mx-auto mb-8 sm:mb-10 lg:mb-12 xl:mb-16"></div>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            {/* Microphone button */}
+            <button className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {/* Create button */}
+            <button className="px-8 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-base sm:text-lg md:text-xl lg:text-2xl font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+              Create
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
