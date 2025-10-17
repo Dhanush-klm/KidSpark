@@ -57,7 +57,7 @@ export default function Screen2({ onNext }: Screen2Props) {
               onClick={onNext}
               className="mt-4 sm:mt-6 px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
-              Let's go 👋
+              Let&apos;s go 👋
             </button>
           </div>
         </div>

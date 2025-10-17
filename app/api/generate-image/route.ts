@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
       throw new Error(`Imagen API error: ${response.status} ${response.statusText}`);
     }
 

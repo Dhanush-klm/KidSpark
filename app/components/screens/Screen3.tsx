@@ -3,6 +3,13 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 
+// Extend window interface for mediaRecorder
+declare global {
+  interface Window {
+    currentMediaRecorder?: MediaRecorder;
+  }
+}
+
 interface Screen3Props {
   onImageGenerated?: (imageUrl: string, prompt: string) => void;
 }
@@ -74,7 +81,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
     try {
       if (isRecording) {
         // Stop recording if already recording
-        const currentRecorder = (window as any).currentMediaRecorder;
+        const currentRecorder = window.currentMediaRecorder;
         if (currentRecorder) {
           currentRecorder.stop();
         }
@@ -113,7 +120,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
       mediaRecorder.start();
 
       // Store mediaRecorder reference so we can stop it later
-      (window as any).currentMediaRecorder = mediaRecorder;
+      window.currentMediaRecorder = mediaRecorder;
 
     } catch (error) {
       console.error('Error accessing microphone:', error);
@@ -187,7 +194,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
               Hi Champu
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700">
-              Let's learn something new today!
+              Let&apos;s learn something new today!
             </p>
           </div>
 
@@ -289,9 +296,11 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
                   Your Sketch Template
                 </h3>
                 <div className="relative">
-                  <img
+                  <Image
                     src={generatedImage}
                     alt="Generated sketch template"
+                    width={800}
+                    height={600}
                     className="w-full h-auto rounded-lg shadow-lg"
                   />
                   <div className="absolute inset-0 bg-black/5 rounded-lg pointer-events-none"></div>

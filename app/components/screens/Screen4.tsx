@@ -126,7 +126,7 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
               Hi Champu
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700">
-              Let's color and animate!
+              Let&apos;s color and animate!
             </p>
           </div>
 
@@ -196,9 +196,11 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
                   Your browser does not support the video tag.
                 </video>
               ) : currentImageUrl ? (
-                <img
+                <Image
                   src={currentImageUrl}
                   alt="Sketch template"
+                  width={800}
+                  height={600}
                   className="w-full h-full object-contain rounded-xl"
                 />
               ) : (

@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
 
 // Initialize Google GenAI
 const ai = new GoogleGenAI({
@@ -60,7 +61,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Read the downloaded file
-    const fs = require('fs');
     const videoBuffer = fs.readFileSync("temp_video.mp4");
     const base64Video = videoBuffer.toString('base64');
     const mimeType = 'video/mp4';
