@@ -82,7 +82,7 @@ The solid black color should just gradually and smoothly appear inside the lines
 
 Animation Phase: Only after all dotted regions are completely filled with solid black, make these newly filled objects come to life and animate the scene based on the following prompt: ${prompt}.`;
     const operation1 = await ai.models.generateVideos({
-      model: "veo-2.0-generate-001",
+      model: "veo-3.0-fast-generate-001",
       prompt: coloringPrompt,
       image: {
         imageBytes: imageBytes.toString('base64'),
