@@ -70,7 +70,17 @@ export async function POST(request: NextRequest) {
 
     // STEP 1: Generate first 8-second clip (coloring the dotted areas in black)
     console.log('📹 Generating first 8-second clip (coloring)...');
-    const coloringPrompt = `${prompt}. Show a clear, kid-friendly animation where the black dotted regions of the sketch fill in gradually with solid black ink, as if being colored.`;
+    const coloringPrompt = `Generate a two-phase, kid-friendly animation.
+
+Coloring Phase: First, animate the input sketch's dotted regions by filling them with solid, flat, black color.
+
+Crucial Style: The fill must be a perfectly clean, solid black fill (like a silhouette).
+
+Do NOT show any scribbling, marker strokes, crayon effects, or any animation of a tool (like a pen or brush) doing the coloring.
+
+The solid black color should just gradually and smoothly appear inside the lines until all dotted areas are full.
+
+Animation Phase: Only after all dotted regions are completely filled with solid black, make these newly filled objects come to life and animate the scene based on the following prompt: ${prompt}.`;
     const operation1 = await ai.models.generateVideos({
       model: "veo-2.0-generate-001",
       prompt: coloringPrompt,
