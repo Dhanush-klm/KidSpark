@@ -12,7 +12,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Enhanced prompt for black sketch style with minimal, integrated dotted areas for children to sketch
-    const enhancedPrompt = `${prompt}. Black and white line art sketch only, no colors, no shading, no grayscale, just pure black lines on white background. Simple, clean line drawing perfect for children to color. Include ONLY 4-6 strategically placed black filled circles that serve as natural focal points within the sketch design - like eyes on characters, centers of flowers, or key decorative elements. These dots should be perfectly integrated into the line art and positioned sparingly to create clean, intentional coloring opportunities. Avoid scattered or random dots. Minimalist sketch style, like a coloring book page with just a few purposeful black circular elements that invite creative coloring.`;
+    const enhancedPrompt = `Generate a simple, clean black and white line art sketch based on the user's prompt: ${prompt}.
+
+The style must be a minimalist coloring book page, using only pure black lines on a solid white background. There must be no colors, shading, or grayscale.
+
+The most important feature is the strategic placement of dots to guide coloring:
+
+Selective Areas: You must strategically select only some areas of the image to be colored (e.g., the main subject, a background element like a cloud or hill). Not all shapes should have dots. This selection is crucial for creating a final, high-contrast black and white image when the child colors these parts.
+
+Dot Placement: All dots must be placed inside the outlines of the specific areas you have selected for coloring.
+
+Dot Style & Density: The dots must be solid black circles of a medium, clearly visible size. These dots should partially fill the selected areas in a sparse, scattered pattern. There must be significant white space between the dots.
+
+Avoid: Do not use tiny, fine stippling. Do not fill the area with a dense "chicken pox" pattern.
+
+The final image should be a clean line drawing where specific parts are clearly but sparsely dotted, perfectly indicating to a child which sections to fill in with black.`;
 
     // Use the direct API call instead of the SDK for Imagen
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${process.env.GOOGLE_API_KEY}`, {
