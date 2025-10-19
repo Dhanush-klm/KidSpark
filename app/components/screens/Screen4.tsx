@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Screen4Props {
   imageUrl: string | null;
@@ -14,6 +14,14 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(imageUrl);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+
+  // Debug: Track when video URL changes
+  useEffect(() => {
+    console.log('generatedVideoUrl changed:', generatedVideoUrl);
+    if (generatedVideoUrl) {
+      console.log('Video should now be visible in the UI');
+    }
+  }, [generatedVideoUrl]);
 
   const handleRefresh = async () => {
     if (!prompt) return;
@@ -51,6 +59,7 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
 
     setIsGeneratingVideo(true);
     try {
+      console.log('Starting video generation request...');
       const response = await fetch('/api/generate-video', {
         method: 'POST',
         headers: {
@@ -62,12 +71,29 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('API response:', result);
 
       if (result.success) {
+        if (!result.videoPath) {
+          console.error('No videoPath in response:', result);
+          alert('Error: No video path returned from server');
+          return;
+        }
+
         // Use the proxy route to serve the video
         const videoUrl = `/api/serve-video?path=${encodeURIComponent(result.videoPath)}`;
         console.log('Generated video URL:', videoUrl);
+        console.log('Setting video URL and switching to animation tab...');
         setGeneratedVideoUrl(videoUrl);
         setActiveTab('animation');
       } else {
