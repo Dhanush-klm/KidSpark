@@ -14,15 +14,18 @@ declare global {
 
 interface Screen3Props {
   onImageGenerated?: (imageUrl: string, prompt: string) => void;
+  onBack?: () => void;
+  onProceed?: () => void;
 }
 
-export default function Screen3({ onImageGenerated }: Screen3Props) {
+export default function Screen3({ onImageGenerated, onBack, onProceed }: Screen3Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [showEmptyPromptModal, setShowEmptyPromptModal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [decorOffsets, setDecorOffsets] = useState({
     a: { x: 0, y: 0, r: 0 },
@@ -65,7 +68,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
   const generateImage = async () => {
     const prompt = textareaRef.current?.value.trim();
     if (!prompt) {
-      alert('Please enter a creative idea first!');
+      setShowEmptyPromptModal(true);
       return;
     }
 
@@ -186,7 +189,19 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
     }
   };
   return (
+    <>
     <div className="min-h-[100dvh] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-4 left-4 z-30 inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 shadow-xl hover:shadow-2xl ring-4 ring-white/70 transition transform hover:scale-105"
+          aria-label="Go back"
+        >
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Decorative circles and shapes */}
@@ -332,7 +347,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
             <button
               onClick={startRecording}
               disabled={isTranscribing}
-              className={`w-20 h-20 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+              className={`w-20 h-20 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 transform transition-all duration-300 ${
                 isTranscribing
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-75'
                   : isListening
@@ -362,7 +377,7 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
             <button
               onClick={generateImage}
               disabled={isGenerating || isTranscribing}
-              className={`w-full sm:w-auto min-h-16 px-10 sm:px-10 md:px-12 lg:px-16 py-5 sm:py-4 text-white text-3xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+              className={`w-full sm:w-auto min-h-16 px-12 sm:px-12 md:px-14 lg:px-20 py-6 sm:py-5 text-white text-3xl sm:text-3xl md:text-4xl lg:text-4xl font-bold rounded-full shadow-xl hover:shadow-2xl ring-4 ring-pink-200/40 transform transition-all duration-300 ${
                 isGenerating || isTranscribing
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-75'
                   : 'bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 cursor-pointer'
@@ -392,11 +407,44 @@ export default function Screen3({ onImageGenerated }: Screen3Props) {
                 <p className="text-base text-gray-600 mt-4 text-center">
                   Black dots show where to sketch the details. Children can fill in these areas with their creativity!
                 </p>
+                {onProceed && (
+                  <div className="mt-6 flex items-center justify-center">
+                    <button
+                      onClick={onProceed}
+                      className="min-h-16 px-10 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-2xl font-bold rounded-full shadow-xl hover:shadow-2xl ring-4 ring-pink-200/40 transform hover:scale-105 transition-all"
+                    >
+                      Proceed to Animation
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
     </div>
+    {showEmptyPromptModal && (
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 relative text-center">
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Lottie
+              src="https://lottie.host/02d2dc96-07dc-4618-94c5-5fd782a43452/sLZLeOfrkj.lottie"
+              className="w-40 h-40"
+            />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">Please enter your creative idea</h3>
+          <p className="text-gray-600 mb-6">Type what you want to create, then tap Create!</p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setShowEmptyPromptModal(false)}
+              className="min-h-12 px-8 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

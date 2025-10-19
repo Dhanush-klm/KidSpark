@@ -1,16 +1,27 @@
 "use client";
 
-import Image from 'next/image';
 import KidSparkHeader from '../KidSparkHeader';
 import Lottie from '../Lottie';
 
 interface Screen2Props {
   onNext: () => void;
+  onBack?: () => void;
 }
 
-export default function Screen2({ onNext }: Screen2Props) {
+export default function Screen2({ onNext, onBack }: Screen2Props) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-4 left-4 z-30 inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 shadow-xl hover:shadow-2xl ring-4 ring-white/70 transition transform hover:scale-105"
+          aria-label="Go back"
+        >
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Large circles */}
@@ -61,7 +72,7 @@ export default function Screen2({ onNext }: Screen2Props) {
             {/* Desktop/tablet CTA */}
             <button
               onClick={onNext}
-              className="hidden sm:inline-flex mt-4 sm:mt-6 px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-lg sm:text-xl font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="hidden sm:inline-flex mt-4 sm:mt-6 px-10 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xl sm:text-2xl font-bold rounded-full shadow-xl hover:shadow-2xl ring-4 ring-pink-200/40 transform hover:scale-105 transition-all duration-300"
             >
               Let&apos;s go 👋
             </button>
@@ -70,7 +81,7 @@ export default function Screen2({ onNext }: Screen2Props) {
               <div className="fixed left-4 right-4 bottom-4 z-30">
                 <button
                   onClick={onNext}
-                  className="w-full min-h-14 px-6 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-2xl font-bold rounded-full shadow-xl active:scale-[0.98] transition-all"
+                  className="w-full min-h-16 px-8 py-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-3xl font-extrabold rounded-full shadow-2xl ring-4 ring-pink-200/40 active:scale-[0.98] transition-all"
                 >
                   Let&apos;s go 👋
                 </button>

@@ -3,13 +3,15 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import KidSparkHeader from '../KidSparkHeader';
+import Lottie from '../Lottie';
 
 interface Screen4Props {
   imageUrl: string | null;
   prompt: string;
+  onBack?: () => void;
 }
 
-export default function Screen4({ imageUrl, prompt }: Screen4Props) {
+export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
   const [activeTab, setActiveTab] = useState<'coloring' | 'animation'>('coloring');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(imageUrl);
@@ -133,6 +135,17 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-4 left-4 z-30 inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 shadow-xl hover:shadow-2xl ring-4 ring-white/70 transition transform hover:scale-105"
+          aria-label="Go back"
+        >
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Decorative circles and shapes */}
@@ -186,7 +199,7 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
         </div>
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 overflow-y-auto pb-28 sm:pb-0">
           {/* Tab Navigation */}
           <div className="flex bg-white/80 backdrop-blur-sm rounded-full p-1 mb-8 shadow-lg">
             <button
@@ -214,44 +227,75 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
           {/* Sketch Display Area */}
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl mb-8 w-full max-w-4xl">
             <div className="aspect-[4/3] bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden">
-              {activeTab === 'animation' && generatedVideoUrl ? (
-                <video
-                  src={generatedVideoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain rounded-xl"
-                  onError={(e) => {
-                    console.error('Video error details:', e);
-                    const videoElement = e.target as HTMLVideoElement;
-                    console.error('Video element error:', videoElement.error);
-                    console.log('Attempted video URL:', generatedVideoUrl);
-                    console.log('Video element readyState:', videoElement.readyState);
-                    if (videoElement.error) {
-                      console.error('Video error code:', videoElement.error.code);
-                      console.error('Video error message:', videoElement.error.message);
-                    }
-                    alert('Error loading video. Please check the console for details and try again.');
-                  }}
-                >
-                  Your browser does not support the video tag.
-                </video>
-              ) : currentImageUrl ? (
-                <Image
-                  src={currentImageUrl}
-                  alt="Sketch template"
-                  width={800}
-                  height={600}
-                  className="w-full h-full object-contain rounded-xl"
-                />
-              ) : (
-                <div className="text-center text-gray-500">
-                  <div className="animate-pulse">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-lg font-medium">Sketch Template</p>
-                    <p className="text-sm">Black dots show where to add colors!</p>
+              <div className={isGeneratingVideo ? 'w-full h-full blur-sm' : 'w-full h-full'}>
+                {activeTab === 'animation' && generatedVideoUrl ? (
+                  <video
+                    src={generatedVideoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain rounded-xl"
+                    onError={(e) => {
+                      console.error('Video error details:', e);
+                      const videoElement = e.target as HTMLVideoElement;
+                      console.error('Video element error:', videoElement.error);
+                      console.log('Attempted video URL:', generatedVideoUrl);
+                      console.log('Video element readyState:', videoElement.readyState);
+                      if (videoElement.error) {
+                        console.error('Video error code:', videoElement.error.code);
+                        console.error('Video error message:', videoElement.error.message);
+                      }
+                      alert('Error loading video. Please check the console for details and try again.');
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : currentImageUrl ? (
+                  <Image
+                    src={currentImageUrl}
+                    alt="Sketch template"
+                    width={800}
+                    height={600}
+                    className="w-full h-full object-contain rounded-xl"
+                  />
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <div className="animate-pulse">
+                      <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-lg font-medium">Sketch Template</p>
+                      <p className="text-sm">Black dots show where to add colors!</p>
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {isGeneratingVideo && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/40">
+                  <Lottie
+                    src="https://lottie.host/ad5870ab-c2d2-4144-819f-b9899e242a1b/51FakkvBUy.lottie"
+                    className="w-72 h-72"
+                  />
+                </div>
+              )}
+
+              {/* Prompt to generate when on Animation tab but no video yet */}
+              {activeTab === 'animation' && !generatedVideoUrl && !isGeneratingVideo && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/30">
+                  <button
+                    onClick={handlePlay}
+                    className="group relative overflow-hidden w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 bg-gradient-to-r from-red-500 to-pink-500 transform hover:scale-105 transition-all duration-300"
+                    aria-label="Generate animation"
+                  >
+                    <span className="relative z-10">
+                      <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </button>
+                  <p className="mt-4 text-base sm:text-lg md:text-xl font-semibold text-gray-700 text-center px-4">
+                    Tap Play to create your animation
+                  </p>
                 </div>
               )}
 
@@ -277,13 +321,13 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             </div>
           </div>
 
-          {/* Control Buttons */}
-          <div className="flex items-center justify-center gap-4 sm:gap-6">
+          {/* Control Buttons (desktop/tablet) */}
+          <div className="hidden sm:flex items-center justify-center gap-4 sm:gap-6">
             {/* Refresh button */}
             <button
               onClick={handleRefresh}
               disabled={isRegenerating}
-              className={`group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
+              className={`group relative overflow-hidden w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
                 isRegenerating
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:scale-105 cursor-pointer'
@@ -299,13 +343,13 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
               )}
               {isRegenerating ? (
                 <div className="animate-spin relative z-10">
-                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </div>
               ) : (
                 <span className="relative z-10">
-                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </span>
@@ -316,7 +360,7 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             <button
               onClick={handlePlay}
               disabled={isGeneratingVideo}
-              className={`group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-2xl transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200 ${
+              className={`group relative overflow-hidden w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200 ${
                 isGeneratingVideo
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 cursor-pointer'
@@ -332,13 +376,13 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
               )}
               {isGeneratingVideo ? (
                 <div className="animate-spin relative z-10">
-                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </div>
               ) : (
                 <span className="relative z-10">
-                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                   </svg>
                 </span>
@@ -348,18 +392,68 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             {/* Download button */}
             <button
               onClick={handleDownload}
-              className="group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200"
+              className="group relative overflow-hidden w-20 h-20 md:w-24 md:h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 transform hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200"
             >
               {/* Glow and shine overlays */}
               <span className="absolute -inset-6 rounded-full blur-2xl bg-gradient-to-r from-yellow-300/30 via-orange-300/30 to-pink-300/30 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
               <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="pointer-events-none absolute left-[-150%] top-0 h-full w-1/3 bg-white/20 -skew-x-12 group-hover:translate-x-[450%] transition-transform duration-700" />
               <span className="relative z-10">
-                <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 transform translate-x-[0.5px] -translate-y-[0.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m8 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-10 h-10 md:w-12 md:h-12 transform translate-x-[0.5px] -translate-y-[0.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5L12 15m0 0l4.5-4.5M12 15V3" />
                 </svg>
               </span>
             </button>
+          </div>
+
+          {/* Mobile Sticky Action Bar */}
+          <div className="sm:hidden fixed left-4 right-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20">
+            <div className="bg-white/80 backdrop-blur-md rounded-full shadow-2xl p-2 flex items-center gap-2">
+              {/* Again (Regenerate) */}
+              <button
+                onClick={handleRefresh}
+                disabled={isRegenerating}
+                aria-busy={isRegenerating}
+                className={`flex-1 h-16 rounded-full flex items-center justify-center gap-2 text-white text-xl font-bold transition-all shadow-xl ring-2 ring-white/60 ${
+                  isRegenerating
+                    ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-75'
+                    : 'bg-gradient-to-r from-purple-500 to-purple-600 active:scale-[0.98]'
+                }`}
+              >
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Again
+              </button>
+
+              {/* Play (Generate Video) */}
+              <button
+                onClick={handlePlay}
+                disabled={isGeneratingVideo}
+                aria-busy={isGeneratingVideo}
+                className={`flex-1 h-16 rounded-full flex items-center justify-center gap-2 text-white text-xl font-bold transition-all shadow-xl ring-2 ring-white/60 ${
+                  isGeneratingVideo
+                    ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-75'
+                    : 'bg-gradient-to-r from-red-500 to-pink-500 active:scale-[0.98]'
+                }`}
+              >
+                <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                </svg>
+                Play
+              </button>
+
+              {/* Save (Download) */}
+              <button
+                onClick={handleDownload}
+                className="flex-1 h-16 rounded-full flex items-center justify-center gap-2 text-white text-xl font-bold transition-all shadow-xl ring-2 ring-white/60 bg-gradient-to-r from-yellow-400 to-orange-500 active:scale-[0.98]"
+              >
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5L12 15m0 0l4.5-4.5M12 15V3" />
+                </svg>
+                Save
+              </button>
+            </div>
           </div>
         </div>
       </div>

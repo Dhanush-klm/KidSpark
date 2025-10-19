@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
     const bytes = await audioFile.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Use Whisper API to transcribe
-    const transcription = await openai.audio.transcriptions.create({
+    // Use Whisper translations endpoint to always return English
+    const transcription = await openai.audio.translations.create({
       file: new File([buffer], audioFile.name, { type: audioFile.type }),
       model: 'whisper-1',
     });

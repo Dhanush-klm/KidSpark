@@ -38,11 +38,17 @@ export default function Home() {
     case 'screen1':
       return <Screen1 />;
     case 'screen2':
-      return <Screen2 onNext={handleNext} />;
+      return <Screen2 onNext={handleNext} onBack={() => setCurrentScreen('screen1')} />;
     case 'screen3':
-      return <Screen3 onImageGenerated={(imageUrl: string, prompt: string) => handleImageGenerated(imageUrl, prompt)} />;
+      return (
+        <Screen3
+          onImageGenerated={(imageUrl: string, prompt: string) => handleImageGenerated(imageUrl, prompt)}
+          onBack={() => setCurrentScreen('screen2')}
+          onProceed={() => setCurrentScreen('screen4')}
+        />
+      );
     case 'screen4':
-      return <Screen4 imageUrl={generatedImage} prompt={currentPrompt} />;
+      return <Screen4 imageUrl={generatedImage} prompt={currentPrompt} onBack={() => setCurrentScreen('screen3')} />;
     default:
       return <Screen1 />;
   }
