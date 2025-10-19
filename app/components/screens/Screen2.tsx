@@ -61,11 +61,11 @@ export default function Screen2({ onNext, onBack }: Screen2Props) {
           <div className="space-y-3 sm:space-y-4 pb-24 sm:pb-0">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight">
               Innovative learning<br />
-              <span className="text-orange-600">modern learner</span>
+              <span className="text-orange-600">for modern learners</span>
             </h2>
 
             <p className="text-lg sm:text-2xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed px-2">
-              It is a long established fact that a reader will by the readable content of a page when.
+              Dream it, say it, and watch your ideas turn into colorful sketches and fun animations.
             </p>
 
             {/* CTA Button */}
