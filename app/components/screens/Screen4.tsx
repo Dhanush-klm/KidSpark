@@ -287,11 +287,7 @@ export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
                     className="group relative overflow-hidden w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-white shadow-xl hover:shadow-2xl ring-4 ring-white/60 bg-gradient-to-r from-red-500 to-pink-500 transform hover:scale-105 transition-all duration-300"
                     aria-label="Generate animation"
                   >
-                    <span className="relative z-10">
-                      <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                      </svg>
-                    </span>
+                    <span className="relative z-10 text-xl sm:text-2xl md:text-3xl font-extrabold">Play</span>
                   </button>
                   <p className="mt-4 text-base sm:text-lg md:text-xl font-semibold text-gray-700 text-center px-4">
                     Tap Play to create your animation
@@ -348,11 +344,7 @@ export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
                   </svg>
                 </div>
               ) : (
-                <span className="relative z-10">
-                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </span>
+                <span className="relative z-10 text-sm md:text-base font-bold">Again</span>
               )}
             </button>
 
@@ -381,11 +373,7 @@ export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
                   </svg>
                 </div>
               ) : (
-                <span className="relative z-10">
-                  <svg className="w-10 h-10 md:w-12 md:h-12" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                  </svg>
-                </span>
+                <span className="relative z-10 text-sm md:text-base font-bold">Play</span>
               )}
             </button>
 
@@ -398,11 +386,7 @@ export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
               <span className="absolute -inset-6 rounded-full blur-2xl bg-gradient-to-r from-yellow-300/30 via-orange-300/30 to-pink-300/30 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
               <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="pointer-events-none absolute left-[-150%] top-0 h-full w-1/3 bg-white/20 -skew-x-12 group-hover:translate-x-[450%] transition-transform duration-700" />
-              <span className="relative z-10">
-                <svg className="w-10 h-10 md:w-12 md:h-12 transform translate-x-[0.5px] -translate-y-[0.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5L12 15m0 0l4.5-4.5M12 15V3" />
-                </svg>
-              </span>
+            <span className="relative z-10 text-sm md:text-base font-bold">Save</span>
             </button>
           </div>
 
