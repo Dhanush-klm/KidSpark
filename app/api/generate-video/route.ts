@@ -1,52 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import ffmpeg from 'fluent-ffmpeg';
-import { writeFile, unlink } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
-
-// Resolve ffmpeg path dynamically: use ffmpeg-static if available, otherwise rely on PATH
-let ffmpegPathResolved: string | null = null;
-async function ensureFfmpegPath(): Promise<void> {
-  if (ffmpegPathResolved) return;
-  try {
-    const mod = (await import('ffmpeg-static')) as unknown;
-    const maybePath = (mod as { default?: unknown }).default;
-    const staticPath = typeof maybePath === 'string' ? maybePath : undefined;
-    if (staticPath) {
-      try {
-        const { access } = await import('fs/promises');
-        await access(staticPath);
-        ffmpeg.setFfmpegPath(staticPath);
-        ffmpegPathResolved = staticPath;
-        return;
-      } catch {
-        // path not found in this environment; fall through
-      }
-    }
-  } catch {
-    // ignore - fallback to PATH
-  }
-  ffmpeg.setFfmpegPath('ffmpeg');
-  ffmpegPathResolved = 'ffmpeg';
-}
+// ffmpeg-based helpers removed in single-clip mode
 
 // Initialize Google GenAI
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
-// Initialize Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Note: Supabase removed for direct preview flow
 
 // Helper function to poll operation until complete
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,61 +44,7 @@ async function downloadVideo(videoFile: any): Promise<Buffer> {
   return Buffer.from(arrayBuffer);
 }
 
-// Helper function to stitch two videos together
-async function stitchVideos(video1Buffer: Buffer, video2Buffer: Buffer): Promise<Buffer> {
-  // Ensure ffmpeg path is set in the current environment
-  await ensureFfmpegPath();
-  const tempDir = tmpdir();
-  const video1Path = join(tempDir, `clip1-${Date.now()}.mp4`);
-  const video2Path = join(tempDir, `clip2-${Date.now()}.mp4`);
-  const listPath = join(tempDir, `list-${Date.now()}.txt`);
-  const outputPath = join(tempDir, `output-${Date.now()}.mp4`);
-
-  try {
-    // Write temporary files
-    await writeFile(video1Path, video1Buffer);
-    await writeFile(video2Path, video2Buffer);
-    
-    // Create concat list file for ffmpeg
-    const listContent = `file '${video1Path}'\nfile '${video2Path}'`;
-    await writeFile(listPath, listContent);
-
-    // Stitch videos using ffmpeg
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg()
-        .input(listPath)
-        .inputOptions(['-f', 'concat', '-safe', '0'])
-        .outputOptions(['-c', 'copy'])
-        .output(outputPath)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(err))
-        .run();
-    });
-
-    // Read the stitched video
-    const { readFile } = await import('fs/promises');
-    const stitchedBuffer = await readFile(outputPath);
-
-    // Clean up temporary files
-    await Promise.all([
-      unlink(video1Path).catch(() => {}),
-      unlink(video2Path).catch(() => {}),
-      unlink(listPath).catch(() => {}),
-      unlink(outputPath).catch(() => {})
-    ]);
-
-    return stitchedBuffer;
-  } catch (error) {
-    // Clean up on error
-    await Promise.all([
-      unlink(video1Path).catch(() => {}),
-      unlink(video2Path).catch(() => {}),
-      unlink(listPath).catch(() => {}),
-      unlink(outputPath).catch(() => {})
-    ]);
-    throw error;
-  }
-}
+// Stitch/extract helpers removed in single-clip mode
 
 export async function POST(request: NextRequest) {
   try {
@@ -149,7 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🎬 Starting 15-second video generation...');
+    console.log('🎬 Starting 8-second video generation...');
 
     // Fetch the image from the URL
     const imageResponse = await fetch(imageUrl);
@@ -160,11 +68,12 @@ export async function POST(request: NextRequest) {
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageBytes = Buffer.from(imageBuffer);
 
-    // STEP 1: Generate first 8-second clip
-    console.log('📹 Generating first 8-second clip...');
+    // STEP 1: Generate first 8-second clip (coloring the dotted areas in black)
+    console.log('📹 Generating first 8-second clip (coloring)...');
+    const coloringPrompt = `${prompt}. Show a clear, kid-friendly animation where the black dotted regions of the sketch fill in gradually with solid black ink, as if being colored.`;
     const operation1 = await ai.models.generateVideos({
       model: "veo-2.0-generate-001",
-      prompt: prompt,
+      prompt: coloringPrompt,
       image: {
         imageBytes: imageBytes.toString('base64'),
         mimeType: "image/png",
@@ -179,61 +88,15 @@ export async function POST(request: NextRequest) {
 
     const videoFile1 = completedOp1.response.generatedVideos[0].video;
     const videoBuffer1 = await downloadVideo(videoFile1);
-    console.log('✅ First clip generated successfully');
+    console.log('✅ First clip generated (single-clip mode). Returning base64 for preview...');
 
-    // STEP 2: Generate second 7-second clip with continuation prompt
-    console.log('📹 Generating second 7-second clip (continuation)...');
-    
-    // Create a continuation prompt that builds on the first clip
-    const continuationPrompt = `${prompt} The scene continues smoothly, maintaining the same visual style and character.`;
-    
-    const operation2 = await ai.models.generateVideos({
-      model: "veo-2.0-generate-001",
-      prompt: continuationPrompt,
-      image: {
-        imageBytes: imageBytes.toString('base64'),
-        mimeType: "image/png",
-      },
-    });
-
-    const completedOp2 = await pollOperation(operation2);
-
-    if (!completedOp2.response?.generatedVideos?.[0]?.video) {
-      throw new Error('No video generated for second clip');
-    }
-
-    const videoFile2 = completedOp2.response.generatedVideos[0].video;
-    const videoBuffer2 = await downloadVideo(videoFile2);
-    console.log('✅ Second clip generated successfully');
-
-    // STEP 3: Stitch both videos together
-    console.log('🔗 Stitching clips together...');
-    const finalVideoBuffer = await stitchVideos(videoBuffer1, videoBuffer2);
-    console.log('✅ Videos stitched successfully. Final size:', finalVideoBuffer.length, 'bytes');
-
-    // STEP 4: Upload the final 15-second video to Supabase
-    const fileName = `generated-videos/${Date.now()}.mp4`;
-    console.log('☁️ Uploading final video to Supabase:', fileName);
-
-    const { error: uploadError } = await supabase.storage
-      .from('kidspark')
-      .upload(fileName, finalVideoBuffer, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: 'video/mp4'
-      });
-
-    if (uploadError) {
-      console.error('Supabase upload error:', uploadError);
-      throw new Error(`Failed to upload video: ${uploadError.message}`);
-    }
-
-    console.log('🎉 15-second video generation complete!');
+    // Return only the first 8s clip as base64 data URL (ephemeral)
+    const dataUrl = `data:video/mp4;base64,${videoBuffer1.toString('base64')}`;
 
     return NextResponse.json({
       success: true,
-      videoPath: fileName,
-      duration: '~15 seconds'
+      dataUrl,
+      duration: '~8 seconds'
     });
 
   } catch (error) {

@@ -84,17 +84,16 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
       console.log('API response:', result);
 
       if (result.success) {
-        if (!result.videoPath) {
-          console.error('No videoPath in response:', result);
-          alert('Error: No video path returned from server');
+        const dataUrl: string | undefined = result.dataUrl;
+        if (!dataUrl) {
+          console.error('No dataUrl in response:', result);
+          alert('Error: No video data returned from server');
           return;
         }
 
-        // Use the proxy route to serve the video
-        const videoUrl = `/api/serve-video?path=${encodeURIComponent(result.videoPath)}`;
-        console.log('Generated video URL:', videoUrl);
-        console.log('Setting video URL and switching to animation tab...');
-        setGeneratedVideoUrl(videoUrl);
+        // Use base64 data URL for immediate playback
+        console.log('Received base64 video data URL');
+        setGeneratedVideoUrl(dataUrl);
         setActiveTab('animation');
       } else {
         console.error('Video generation failed:', result.error);
