@@ -2,12 +2,73 @@ import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import ffmpeg from 'fluent-ffmpeg';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile, unlink, access } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { execSync } from 'child_process';
 
-// Set ffmpeg path to system ffmpeg
-ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg');
+// Detect ffmpeg path based on environment
+async function detectFfmpegPath(): Promise<string> {
+  // First, try to use ffmpeg-static (works on Vercel)
+  try {
+    const ffmpegStatic = await import('ffmpeg-static');
+    const staticPath = ffmpegStatic.default;
+    if (staticPath && typeof staticPath === 'string') {
+      try {
+        await access(staticPath);
+        console.log('Using bundled ffmpeg-static');
+        return staticPath;
+      } catch {
+        // Continue to next options
+      }
+    }
+  } catch {
+    console.log('ffmpeg-static not available, trying system paths');
+  }
+
+  // Try common system paths
+  const paths = [
+    '/opt/homebrew/bin/ffmpeg',  // macOS Homebrew (Apple Silicon)
+    '/usr/local/bin/ffmpeg',      // macOS Homebrew (Intel) / Linux
+    '/usr/bin/ffmpeg',            // Linux
+  ];
+
+  for (const path of paths) {
+    try {
+      await access(path);
+      console.log('Using system ffmpeg at:', path);
+      return path;
+    } catch {
+      continue;
+    }
+  }
+
+  // Try to find ffmpeg using 'which' command
+  try {
+    const result = execSync('which ffmpeg', { encoding: 'utf8' }).trim();
+    if (result) {
+      console.log('Found ffmpeg via which:', result);
+      return result;
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  // Fallback to 'ffmpeg' and hope it's in PATH
+  console.log('Falling back to ffmpeg in PATH');
+  return 'ffmpeg';
+}
+
+// Set ffmpeg path asynchronously (will be called before use)
+let ffmpegPathSet = false;
+async function ensureFfmpegPath() {
+  if (!ffmpegPathSet) {
+    const path = await detectFfmpegPath();
+    console.log('Using ffmpeg at:', path);
+    ffmpeg.setFfmpegPath(path);
+    ffmpegPathSet = true;
+  }
+}
 
 // Initialize Google GenAI
 const ai = new GoogleGenAI({
@@ -60,6 +121,9 @@ async function downloadVideo(videoFile: any): Promise<Buffer> {
 
 // Helper function to stitch two videos together
 async function stitchVideos(video1Buffer: Buffer, video2Buffer: Buffer): Promise<Buffer> {
+  // Ensure ffmpeg path is set
+  await ensureFfmpegPath();
+  
   const tempDir = tmpdir();
   const video1Path = join(tempDir, `clip1-${Date.now()}.mp4`);
   const video2Path = join(tempDir, `clip2-${Date.now()}.mp4`);
