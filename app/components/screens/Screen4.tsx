@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import KidSparkHeader from '../KidSparkHeader';
 
 interface Screen4Props {
   imageUrl: string | null;
@@ -148,6 +149,8 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
 
       {/* Main content */}
       <div className="relative z-10 w-full flex flex-col min-h-screen">
+        {/* Brand header */}
+        <KidSparkHeader />
         {/* Header section */}
         <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 flex-shrink-0">
           <div className="flex-1 min-w-0">
@@ -280,22 +283,32 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             <button
               onClick={handleRefresh}
               disabled={isRegenerating}
-              className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+              className={`group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
                 isRegenerating
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:scale-105 cursor-pointer'
               }`}
             >
+              {/* Glow and shine overlays */}
+              {!isRegenerating && (
+                <>
+                  <span className="absolute -inset-6 rounded-full blur-2xl bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-orange-300/20 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+                  <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="pointer-events-none absolute left-[-150%] top-0 h-full w-1/3 bg-white/20 -skew-x-12 group-hover:translate-x-[450%] transition-transform duration-700" />
+                </>
+              )}
               {isRegenerating ? (
-                <div className="animate-spin">
-                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="animate-spin relative z-10">
+                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </div>
               ) : (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <span className="relative z-10">
+                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </span>
               )}
             </button>
 
@@ -303,33 +316,49 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
             <button
               onClick={handlePlay}
               disabled={isGeneratingVideo}
-              className={`w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform transition-all duration-300 ${
+              className={`group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-2xl transform transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200 ${
                 isGeneratingVideo
                   ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 cursor-pointer'
               }`}
             >
+              {/* Glow and shine overlays */}
+              {!isGeneratingVideo && (
+                <>
+                  <span className="absolute -inset-8 rounded-full blur-2xl bg-gradient-to-r from-red-400/25 via-pink-400/25 to-orange-300/25 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+                  <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="pointer-events-none absolute left-[-150%] top-0 h-full w-1/3 bg-white/25 -skew-x-12 group-hover:translate-x-[450%] transition-transform duration-700" />
+                </>
+              )}
               {isGeneratingVideo ? (
-                <div className="animate-spin">
+                <div className="animate-spin relative z-10">
                   <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </div>
               ) : (
-                <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
+                <span className="relative z-10">
+                  <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                </span>
               )}
             </button>
 
             {/* Download button */}
             <button
               onClick={handleDownload}
-              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="group relative overflow-hidden w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200"
             >
-              <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m8 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              {/* Glow and shine overlays */}
+              <span className="absolute -inset-6 rounded-full blur-2xl bg-gradient-to-r from-yellow-300/30 via-orange-300/30 to-pink-300/30 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+              <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="pointer-events-none absolute left-[-150%] top-0 h-full w-1/3 bg-white/20 -skew-x-12 group-hover:translate-x-[450%] transition-transform duration-700" />
+              <span className="relative z-10">
+                <svg className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 transform translate-x-[0.5px] -translate-y-[0.5px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m8 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
