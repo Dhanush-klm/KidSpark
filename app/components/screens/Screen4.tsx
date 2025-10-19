@@ -66,9 +66,12 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
 
       if (result.success) {
         // Use the proxy route to serve the video
-        setGeneratedVideoUrl(`/api/serve-video?path=${encodeURIComponent(result.videoPath)}`);
+        const videoUrl = `/api/serve-video?path=${encodeURIComponent(result.videoPath)}`;
+        console.log('Generated video URL:', videoUrl);
+        setGeneratedVideoUrl(videoUrl);
         setActiveTab('animation');
       } else {
+        console.error('Video generation failed:', result.error);
         alert('Error generating video: ' + result.error);
       }
     } catch (error) {
@@ -191,8 +194,12 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
                   className="w-full h-full object-contain rounded-xl"
                   onError={(e) => {
                     console.error('Video error details:', e);
+                    console.error('Video error code:', e.code);
+                    console.error('Video error message:', e.message);
                     console.log('Attempted video URL:', generatedVideoUrl);
-                    alert('Error loading video. Please try again.');
+                    console.log('Video element readyState:', e.target?.readyState);
+                    console.log('Video element error:', e.target?.error);
+                    alert('Error loading video. Please check the console for details and try again.');
                   }}
                 >
                   Your browser does not support the video tag.

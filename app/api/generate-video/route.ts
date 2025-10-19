@@ -92,6 +92,8 @@ export async function POST(request: NextRequest) {
 
     // Upload the video to Supabase Storage
     const fileName = `generated-videos/${Date.now()}.mp4`;
+    console.log('Uploading video to Supabase:', fileName, 'Size:', videoBuffer.length, 'bytes');
+
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('kidspark') // Your Supabase bucket name
       .upload(fileName, videoBuffer, {
@@ -101,8 +103,11 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
       throw new Error(`Failed to upload video: ${uploadError.message}`);
     }
+
+    console.log('Video uploaded successfully:', uploadData);
 
     // Return the relative path for use with the proxy route
     return NextResponse.json({
