@@ -12,6 +12,7 @@ export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('screen1');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     // Show first screen for 2 seconds, then switch to second screen
@@ -38,13 +39,21 @@ export default function Home() {
     case 'screen1':
       return <Screen1 />;
     case 'screen2':
-      return <Screen2 onNext={handleNext} onBack={() => setCurrentScreen('screen1')} />;
+      return (
+        <Screen2
+          onNext={handleNext}
+          onBack={() => setCurrentScreen('screen1')}
+          name={userName}
+          onNameChange={setUserName}
+        />
+      );
     case 'screen3':
       return (
         <Screen3
           onImageGenerated={(imageUrl: string, prompt: string) => handleImageGenerated(imageUrl, prompt)}
           onBack={() => setCurrentScreen('screen2')}
           onProceed={() => setCurrentScreen('screen4')}
+          userName={userName}
         />
       );
     case 'screen4':

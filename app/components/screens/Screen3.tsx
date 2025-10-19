@@ -16,10 +16,12 @@ interface Screen3Props {
   onImageGenerated?: (imageUrl: string, prompt: string) => void;
   onBack?: () => void;
   onProceed?: () => void;
+  userName?: string;
 }
 
-export default function Screen3({ onImageGenerated, onBack, onProceed }: Screen3Props) {
+export default function Screen3({ onImageGenerated, onBack, onProceed, userName }: Screen3Props) {
   const [isRecording, setIsRecording] = useState(false);
+  const displayName = userName && userName.trim() ? userName.trim() : 'Champu';
   const [isListening, setIsListening] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -236,36 +238,11 @@ export default function Screen3({ onImageGenerated, onBack, onProceed }: Screen3
         <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 flex-shrink-0">
           <div className="flex-1 min-w-0">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold text-orange-600 mb-1 sm:mb-2 leading-tight">
-              Hi Champu
+              Hi {displayName}
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl lg:text-2xl text-gray-700">
               Let&apos;s learn something new today!
             </p>
-          </div>
-
-          {/* Profile image */}
-          <div className="relative group cursor-pointer ml-4 flex-shrink-0">
-            {/* Profile container with enhanced styling */}
-            <div className="relative transform transition-transform duration-300 group-hover:scale-105">
-              {/* Outer ring for profile effect */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 p-1 shadow-lg">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-50 to-orange-50 p-1">
-                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-white shadow-xl ring-2 ring-orange-100">
-                    <Image
-                      src="/screen3.png"
-                      alt="Champu's profile"
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                </div>
-              </div>
-              {/* Online indicator */}
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 bg-green-400 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
-                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
-              </div>
-            </div>
           </div>
         </div>
 

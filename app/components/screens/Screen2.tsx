@@ -6,9 +6,11 @@ import Lottie from '../Lottie';
 interface Screen2Props {
   onNext: () => void;
   onBack?: () => void;
+  name: string;
+  onNameChange: (value: string) => void;
 }
 
-export default function Screen2({ onNext, onBack }: Screen2Props) {
+export default function Screen2({ onNext, onBack, name, onNameChange }: Screen2Props) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden">
       {onBack && (
@@ -67,6 +69,21 @@ export default function Screen2({ onNext, onBack }: Screen2Props) {
             <p className="text-lg sm:text-2xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed px-2">
               Dream it, say it, and watch your ideas turn into colorful sketches and fun animations.
             </p>
+
+            {/* Name input */}
+            <div className="max-w-md mx-auto w-full px-2 sm:px-0">
+              <label htmlFor="kid-name" className="block text-base sm:text-lg font-medium text-gray-700 mb-2 text-left">
+                Enter your name
+              </label>
+              <input
+                id="kid-name"
+                type="text"
+                value={name}
+                onChange={(e) => onNameChange(e.target.value)}
+                placeholder="e.g., Champu"
+                className="w-full px-5 py-3 sm:py-4 text-lg sm:text-xl rounded-full border-2 border-white bg-white/80 backdrop-blur placeholder-gray-400 text-gray-800 shadow-md focus:outline-none focus:ring-4 focus:ring-pink-200/60 focus:border-pink-300 transition"
+              />
+            </div>
 
             {/* CTA Button */}
             {/* Desktop/tablet CTA */}
