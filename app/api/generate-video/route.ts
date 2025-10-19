@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     // STEP 1: Generate first 8-second clip
     console.log('📹 Generating first 8-second clip...');
     const operation1 = await ai.models.generateVideos({
-      model: "veo-3.0-fast-generate-001",
+      model: "veo-2.0-generate-001",
       prompt: prompt,
       image: {
         imageBytes: imageBytes.toString('base64'),
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
     const continuationPrompt = `${prompt} The scene continues smoothly, maintaining the same visual style and character.`;
     
     const operation2 = await ai.models.generateVideos({
-      model: "veo-3.0-fast-generate-001",
+      model: "veo-2.0-generate-001",
       prompt: continuationPrompt,
       image: {
         imageBytes: imageBytes.toString('base64'),
