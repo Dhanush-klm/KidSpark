@@ -25,6 +25,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Helper function to poll operation until complete
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function pollOperation(operation: any) {
   let currentOperation = operation;
   while (!currentOperation.done) {
@@ -38,6 +39,7 @@ async function pollOperation(operation: any) {
 }
 
 // Helper function to download video from Google API
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function downloadVideo(videoFile: any): Promise<Buffer> {
   if (!videoFile.uri) {
     throw new Error('Video URI is missing');
@@ -187,7 +189,7 @@ export async function POST(request: NextRequest) {
     const fileName = `generated-videos/${Date.now()}.mp4`;
     console.log('☁️ Uploading final video to Supabase:', fileName);
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('kidspark')
       .upload(fileName, finalVideoBuffer, {
         cacheControl: '3600',
