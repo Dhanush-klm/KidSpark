@@ -310,7 +310,7 @@ export default function Screen4({ imageUrl, prompt, onBack }: Screen4Props) {
               <p className="text-sm text-blue-800 text-center">
                 {activeTab === 'animation' ? (
                   <>
-                    <strong>Animation:</strong> Your 15-second animated video is ready! Press the center button to generate a new animation from your sketch and prompt.
+                    <strong>Animation:</strong> Your animation is ready! Tap Play any time to make a new one from your sketch and idea.
                   </>
                 ) : (
                   <>
