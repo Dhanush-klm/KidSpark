@@ -1,73 +1,29 @@
 import { GoogleGenAI } from "@google/genai";
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import ffmpeg from 'fluent-ffmpeg';
-import { writeFile, unlink, access } from 'fs/promises';
+import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { execSync } from 'child_process';
 
-// Detect ffmpeg path based on environment
-async function detectFfmpegPath(): Promise<string> {
-  // First, try to use ffmpeg-static (works on Vercel)
+// Resolve ffmpeg path dynamically: use ffmpeg-static if available, otherwise rely on PATH
+let ffmpegPathResolved: string | null = null;
+async function ensureFfmpegPath(): Promise<void> {
+  if (ffmpegPathResolved) return;
   try {
-    const ffmpegStatic = await import('ffmpeg-static');
-    const staticPath = ffmpegStatic.default;
+    const mod: any = await import('ffmpeg-static');
+    const staticPath = (mod && (mod.default || mod)) as string | undefined;
     if (staticPath && typeof staticPath === 'string') {
-      try {
-        await access(staticPath);
-        console.log('Using bundled ffmpeg-static');
-        return staticPath;
-      } catch {
-        // Continue to next options
-      }
+      ffmpeg.setFfmpegPath(staticPath);
+      ffmpegPathResolved = staticPath;
+      return;
     }
   } catch {
-    console.log('ffmpeg-static not available, trying system paths');
+    // ignore - fallback to PATH
   }
-
-  // Try common system paths
-  const paths = [
-    '/opt/homebrew/bin/ffmpeg',  // macOS Homebrew (Apple Silicon)
-    '/usr/local/bin/ffmpeg',      // macOS Homebrew (Intel) / Linux
-    '/usr/bin/ffmpeg',            // Linux
-  ];
-
-  for (const path of paths) {
-    try {
-      await access(path);
-      console.log('Using system ffmpeg at:', path);
-      return path;
-    } catch {
-      continue;
-    }
-  }
-
-  // Try to find ffmpeg using 'which' command
-  try {
-    const result = execSync('which ffmpeg', { encoding: 'utf8' }).trim();
-    if (result) {
-      console.log('Found ffmpeg via which:', result);
-      return result;
-    }
-  } catch {
-    // Continue to fallback
-  }
-
-  // Fallback to 'ffmpeg' and hope it's in PATH
-  console.log('Falling back to ffmpeg in PATH');
-  return 'ffmpeg';
-}
-
-// Set ffmpeg path asynchronously (will be called before use)
-let ffmpegPathSet = false;
-async function ensureFfmpegPath() {
-  if (!ffmpegPathSet) {
-    const path = await detectFfmpegPath();
-    console.log('Using ffmpeg at:', path);
-    ffmpeg.setFfmpegPath(path);
-    ffmpegPathSet = true;
-  }
+  ffmpeg.setFfmpegPath('ffmpeg');
+  ffmpegPathResolved = 'ffmpeg';
 }
 
 // Initialize Google GenAI
@@ -121,9 +77,8 @@ async function downloadVideo(videoFile: any): Promise<Buffer> {
 
 // Helper function to stitch two videos together
 async function stitchVideos(video1Buffer: Buffer, video2Buffer: Buffer): Promise<Buffer> {
-  // Ensure ffmpeg path is set
+  // Ensure ffmpeg path is set in the current environment
   await ensureFfmpegPath();
-  
   const tempDir = tmpdir();
   const video1Path = join(tempDir, `clip1-${Date.now()}.mp4`);
   const video2Path = join(tempDir, `clip2-${Date.now()}.mp4`);
