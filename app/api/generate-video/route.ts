@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Generate video using Veo 3.1 with the image
     const operation = await ai.models.generateVideos({
-      model: "veo-3.1-generate-preview",
+      model: "veo-3.0-fast-generate-001",
       prompt: prompt,
       image: {
         imageBytes: imageBytes.toString('base64'),
