@@ -1,6 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Google GenAI
@@ -65,14 +64,31 @@ export async function POST(request: NextRequest) {
     // Get the video file
     const videoFile = currentOperation.response.generatedVideos[0].video;
 
-    // Download the video to a temporary location
-    await ai.files.download({
-      file: videoFile,
-      downloadPath: "temp_video.mp4",
-    });
+    console.log('Video file object:', videoFile); // Debug: Check if videoFile is valid
 
-    // Read the downloaded file
-    const videoBuffer = fs.readFileSync("temp_video.mp4");
+    // Fetch the video directly from the URI with authentication
+    let videoBuffer: Buffer;
+    try {
+      if (!videoFile.uri) {
+        throw new Error('Video URI is missing');
+      }
+
+      // Add API key as query parameter for authentication
+      const videoUrl = new URL(videoFile.uri);
+      videoUrl.searchParams.set('key', process.env.GOOGLE_API_KEY || '');
+
+      const response = await fetch(videoUrl.toString());
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch video: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      videoBuffer = Buffer.from(arrayBuffer);
+      console.log('Direct fetch and buffer creation succeeded'); // Debug
+    } catch (bufferError) {
+      console.error('Fetch/buffer error:', bufferError);
+      throw new Error(`Failed to get video data: ${bufferError instanceof Error ? bufferError.message : String(bufferError)}`);
+    }
 
     // Upload the video to Supabase Storage
     const fileName = `generated-videos/${Date.now()}.mp4`;
