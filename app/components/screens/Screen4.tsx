@@ -220,11 +220,14 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
                   className="w-full h-full object-contain rounded-xl"
                   onError={(e) => {
                     console.error('Video error details:', e);
-                    console.error('Video error code:', e.code);
-                    console.error('Video error message:', e.message);
+                    const videoElement = e.target as HTMLVideoElement;
+                    console.error('Video element error:', videoElement.error);
                     console.log('Attempted video URL:', generatedVideoUrl);
-                    console.log('Video element readyState:', e.target?.readyState);
-                    console.log('Video element error:', e.target?.error);
+                    console.log('Video element readyState:', videoElement.readyState);
+                    if (videoElement.error) {
+                      console.error('Video error code:', videoElement.error.code);
+                      console.error('Video error message:', videoElement.error.message);
+                    }
                     alert('Error loading video. Please check the console for details and try again.');
                   }}
                 >
