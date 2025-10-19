@@ -15,10 +15,16 @@ async function ensureFfmpegPath(): Promise<void> {
     const mod = (await import('ffmpeg-static')) as unknown;
     const maybePath = (mod as { default?: unknown }).default;
     const staticPath = typeof maybePath === 'string' ? maybePath : undefined;
-    if (staticPath && typeof staticPath === 'string') {
-      ffmpeg.setFfmpegPath(staticPath);
-      ffmpegPathResolved = staticPath;
-      return;
+    if (staticPath) {
+      try {
+        const { access } = await import('fs/promises');
+        await access(staticPath);
+        ffmpeg.setFfmpegPath(staticPath);
+        ffmpegPathResolved = staticPath;
+        return;
+      } catch {
+        // path not found in this environment; fall through
+      }
     }
   } catch {
     // ignore - fallback to PATH
