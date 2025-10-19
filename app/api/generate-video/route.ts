@@ -1,11 +1,22 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize Google GenAI
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
+
+// Initialize Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,12 +73,25 @@ export async function POST(request: NextRequest) {
 
     // Read the downloaded file
     const videoBuffer = fs.readFileSync("temp_video.mp4");
-    const base64Video = videoBuffer.toString('base64');
-    const mimeType = 'video/mp4';
 
+    // Upload the video to Supabase Storage
+    const fileName = `generated-videos/${Date.now()}.mp4`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('kidspark') // Your Supabase bucket name
+      .upload(fileName, videoBuffer, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'video/mp4'
+      });
+
+    if (uploadError) {
+      throw new Error(`Failed to upload video: ${uploadError.message}`);
+    }
+
+    // Return the relative path for use with the proxy route
     return NextResponse.json({
       success: true,
-      videoUrl: `data:${mimeType};base64,${base64Video}`,
+      videoPath: fileName,  // e.g., 'generated-videos/1234567890.mp4'
     });
 
   } catch (error) {

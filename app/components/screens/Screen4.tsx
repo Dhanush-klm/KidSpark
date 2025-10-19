@@ -65,7 +65,8 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
       const result = await response.json();
 
       if (result.success) {
-        setGeneratedVideoUrl(result.videoUrl);
+        // Use the proxy route to serve the video
+        setGeneratedVideoUrl(`/api/serve-video?path=${encodeURIComponent(result.videoPath)}`);
         setActiveTab('animation');
       } else {
         alert('Error generating video: ' + result.error);
@@ -189,7 +190,8 @@ export default function Screen4({ imageUrl, prompt }: Screen4Props) {
                   autoPlay
                   className="w-full h-full object-contain rounded-xl"
                   onError={(e) => {
-                    console.error('Video error:', e);
+                    console.error('Video error details:', e);
+                    console.log('Attempted video URL:', generatedVideoUrl);
                     alert('Error loading video. Please try again.');
                   }}
                 >
