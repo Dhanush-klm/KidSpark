@@ -12,8 +12,9 @@ let ffmpegPathResolved: string | null = null;
 async function ensureFfmpegPath(): Promise<void> {
   if (ffmpegPathResolved) return;
   try {
-    const mod: any = await import('ffmpeg-static');
-    const staticPath = (mod && (mod.default || mod)) as string | undefined;
+    const mod = (await import('ffmpeg-static')) as unknown;
+    const maybePath = (mod as { default?: unknown }).default;
+    const staticPath = typeof maybePath === 'string' ? maybePath : undefined;
     if (staticPath && typeof staticPath === 'string') {
       ffmpeg.setFfmpegPath(staticPath);
       ffmpegPathResolved = staticPath;
