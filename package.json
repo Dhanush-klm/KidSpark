@@ -9,10 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dotlottie/react-player": "^1.6.19",
     "@google/genai": "^1.25.0",
     "@lottiefiles/dotlottie-react": "^0.17.5",
-    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@supabase/supabase-js": "^2.75.1",
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.3",
